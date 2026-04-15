@@ -38,7 +38,8 @@ public enum StoryFormatDetector {
 
         // IFF Blorb: "FORM" at offset 0, "IFRS" at offset 8.
         // Walk the top-level IFF chunk structure to find the story type.
-        // A GLUL chunk means Glulx-blorb; anything else defaults to Z-blorb.
+        // A GLUL chunk means Glulx-blorb; a cleanly walked FORM with no GLUL
+        // is assumed to be Z-blorb; a prefix that ends mid-walk returns nil.
         if data[0..<4] == iffFormTag, data[8..<12] == ifrsTag {
             return detectBlorbFormat(data: data)
         }
@@ -59,9 +60,27 @@ public enum StoryFormatDetector {
     /// IFF chunks are laid out as: 4-byte tag + 4-byte big-endian data size
     /// + data (padded to an even byte boundary). Walking the structure — rather
     /// than scanning a fixed byte window — correctly handles Blorbs whose story
-    /// chunk is preceded by a large resource index (RIDX), which can push the
+    /// chunk is preceded by a large resource index (RIdx), which can push the
     /// GLUL chunk well past the first 512 bytes.
-    private static func detectBlorbFormat(data: Data) -> StoryFormat {
+    ///
+    /// Returns `nil` when the supplied buffer is a prefix that ends before the
+    /// walker reaches the end of the FORM, because in that case we cannot
+    /// distinguish "no GLUL anywhere, must be Z-blorb" from "GLUL is somewhere
+    /// we haven't read yet". Callers that need a definitive answer must pass
+    /// the full file. In practice Blorbs with more than ~6 resources already
+    /// push the story chunk past offset 128, so a fixed 64- or 512-byte prefix
+    /// is never enough for a principled walk.
+    private static func detectBlorbFormat(data: Data) -> StoryFormat? {
+        // FORM size lives at bytes 4-7, big-endian. End of FORM = 8 + formSize.
+        // We use this only for the post-loop disambiguation: the walk itself
+        // still runs against data.count so we tolerate malformed/zero size
+        // fields without losing the chance to find a well-placed GLUL chunk.
+        let formSize =
+            Int(data[4]) << 24
+            | Int(data[5]) << 16
+            | Int(data[6]) << 8
+            | Int(data[7])
+
         var offset = 12  // skip FORM (4) + size (4) + IFRS (4)
         while offset + 8 <= data.count {
             let tag = data[offset..<offset + 4]
@@ -74,6 +93,13 @@ public enum StoryFormatDetector {
             // Advance past header (8) + data, rounded up to even byte boundary.
             offset += 8 + chunkSize + (chunkSize & 1)
         }
+
+        // The loop exited either because we walked to the end of the buffer
+        // or because the next chunk header wouldn't fit. If the declared
+        // FORM extends past the buffer, our walk was truncated mid-FORM and
+        // we cannot apply the "no GLUL means Z-blorb" fallback with any
+        // confidence — return nil so callers know the answer is unknown.
+        if 8 + formSize > data.count { return nil }
         return .zcode
     }
 

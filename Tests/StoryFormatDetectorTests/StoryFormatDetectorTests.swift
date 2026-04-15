@@ -50,6 +50,11 @@ final class StoryFormatDetectorMagicByteTests: XCTestCase {
         XCTAssertNil(StoryFormatDetector.detect(data: data))
     }
 
+    // FORM size 56 means the walker reaches the end of the declared FORM
+    // inside the 64-byte buffer (8-byte header + 56 bytes of payload). No
+    // GLUL is found, so the historical "no GLUL means Z-blorb" fallback
+    // applies. This must pair with testBlorbPrefixTooShortForWalkReturnsNil:
+    // a prefix that does NOT cover the full FORM returns nil instead.
     func testZBlorb() {
         var bytes = [UInt8](repeating: 0, count: 64)
         bytes[0] = 0x46; bytes[1] = 0x4F; bytes[2] = 0x52; bytes[3] = 0x4D
@@ -89,6 +94,24 @@ final class StoryFormatDetectorMagicByteTests: XCTestCase {
         bytes[1020] = 0x47; bytes[1021] = 0x4C; bytes[1022] = 0x55; bytes[1023] = 0x4C
         bytes[1024] = 0x00; bytes[1025] = 0x00; bytes[1026] = 0x00; bytes[1027] = 0x10
         XCTAssertEqual(StoryFormatDetector.detect(data: Data(bytes)), .glulx)
+    }
+
+    /// Regression: a short prefix of a Glulx Blorb with a large resource
+    /// index must return `nil`, not `.zcode`. This reproduces the City of
+    /// Secrets bug where a 64-byte prefix caused the walker to advance past
+    /// its own buffer and silently fall through to the Z-blorb default.
+    /// Shape: FORM size 0x00812234 (~8 MB), RIdx size 0x1F0 (496 bytes),
+    /// GLUL chunk logically at offset 0x204 — not in the 64-byte prefix.
+    func testBlorbPrefixTooShortForWalkReturnsNil() {
+        var bytes = [UInt8](repeating: 0, count: 64)
+        // FORM <size> IFRS
+        bytes[0] = 0x46; bytes[1] = 0x4F; bytes[2] = 0x52; bytes[3] = 0x4D
+        bytes[4] = 0x00; bytes[5] = 0x81; bytes[6] = 0x22; bytes[7] = 0x34
+        bytes[8] = 0x49; bytes[9] = 0x46; bytes[10] = 0x52; bytes[11] = 0x53
+        // RIdx chunk header, size 0x000001F0 — body extends past 64 bytes
+        bytes[12] = 0x52; bytes[13] = 0x49; bytes[14] = 0x64; bytes[15] = 0x78
+        bytes[16] = 0x00; bytes[17] = 0x00; bytes[18] = 0x01; bytes[19] = 0xF0
+        XCTAssertNil(StoryFormatDetector.detect(data: Data(bytes)))
     }
 
     func testDataSlice() {
