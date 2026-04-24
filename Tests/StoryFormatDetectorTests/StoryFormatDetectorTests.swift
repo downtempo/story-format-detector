@@ -66,6 +66,7 @@ final class StoryFormatDetectorMagicByteTests: XCTestCase {
     func testGBlorb() {
         var bytes = [UInt8](repeating: 0, count: 64)
         bytes[0] = 0x46; bytes[1] = 0x4F; bytes[2] = 0x52; bytes[3] = 0x4D
+        bytes[4] = 0; bytes[5] = 0; bytes[6] = 0; bytes[7] = 56
         bytes[8] = 0x49; bytes[9] = 0x46; bytes[10] = 0x52; bytes[11] = 0x53
         bytes[20] = 0x47; bytes[21] = 0x4C; bytes[22] = 0x55; bytes[23] = 0x4C
         XCTAssertEqual(StoryFormatDetector.detect(data: Data(bytes)), .glulx)
@@ -112,6 +113,23 @@ final class StoryFormatDetectorMagicByteTests: XCTestCase {
         bytes[12] = 0x52; bytes[13] = 0x49; bytes[14] = 0x64; bytes[15] = 0x78
         bytes[16] = 0x00; bytes[17] = 0x00; bytes[18] = 0x01; bytes[19] = 0xF0
         XCTAssertNil(StoryFormatDetector.detect(data: Data(bytes)))
+    }
+
+    func testBlorbRejectsFormSizeTooSmallForTypeTag() {
+        var bytes = [UInt8](repeating: 0, count: 64)
+        bytes[0] = 0x46; bytes[1] = 0x4F; bytes[2] = 0x52; bytes[3] = 0x4D
+        bytes[4] = 0x00; bytes[5] = 0x00; bytes[6] = 0x00; bytes[7] = 0x03
+        bytes[8] = 0x49; bytes[9] = 0x46; bytes[10] = 0x52; bytes[11] = 0x53
+        XCTAssertNil(StoryFormatDetector.detect(data: Data(bytes)))
+    }
+
+    func testBlorbDoesNotUseGLULChunkOutsideDeclaredForm() {
+        var bytes = [UInt8](repeating: 0, count: 64)
+        bytes[0] = 0x46; bytes[1] = 0x4F; bytes[2] = 0x52; bytes[3] = 0x4D
+        bytes[4] = 0x00; bytes[5] = 0x00; bytes[6] = 0x00; bytes[7] = 0x04
+        bytes[8] = 0x49; bytes[9] = 0x46; bytes[10] = 0x52; bytes[11] = 0x53
+        bytes[20] = 0x47; bytes[21] = 0x4C; bytes[22] = 0x55; bytes[23] = 0x4C
+        XCTAssertEqual(StoryFormatDetector.detect(data: Data(bytes)), .zcode)
     }
 
     func testDataSlice() {
