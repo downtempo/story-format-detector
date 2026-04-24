@@ -80,9 +80,12 @@ public enum StoryFormatDetector {
             | Int(data[5]) << 16
             | Int(data[6]) << 8
             | Int(data[7])
+        guard formSize >= 4 else { return nil }
 
+        let declaredEnd = 8 + formSize
         var offset = 12  // skip FORM (4) + size (4) + IFRS (4)
-        while offset + 8 <= data.count {
+        let walkLimit = min(data.count, declaredEnd)
+        while offset + 8 <= walkLimit {
             let tag = data[offset..<offset + 4]
             let chunkSize =
                 Int(data[offset + 4]) << 24
@@ -99,7 +102,7 @@ public enum StoryFormatDetector {
         // FORM extends past the buffer, our walk was truncated mid-FORM and
         // we cannot apply the "no GLUL means Z-blorb" fallback with any
         // confidence — return nil so callers know the answer is unknown.
-        if 8 + formSize > data.count { return nil }
+        if declaredEnd > data.count { return nil }
         return .zcode
     }
 
