@@ -1,10 +1,18 @@
 # ``StoryFormatDetector``
 
-Identify interactive fiction story file and package formats from magic bytes or file extensions.
+Identify interactive fiction story file and package formats from magic bytes or
+file extensions.
 
 ## Overview
 
-Interactive fiction games are distributed as binary story files, browser-playable packages, and source/project files in several incompatible formats. StoryFormatDetector inspects the leading bytes of a story file and falls back to file extension matching when the bytes are ambiguous.
+Interactive fiction games are distributed as binary story files,
+browser-playable packages, and source/project files in several incompatible
+formats. StoryFormatDetector inspects the leading bytes of a story file when a
+reliable signature exists and falls back to file extension matching when the
+format is conventionally identified by filename.
+
+Detection is intentionally separate from downstream playability. A consumer can
+recognize a format even when that consumer cannot open it yet.
 
 ### Supported formats
 
