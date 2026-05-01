@@ -48,7 +48,7 @@ docs:
       - "Tests/**"
       - ".github/workflows/**"
 
-  - path: Sources/StoryFormatDetector/Documentation.docc/StoryFormatDetector.md
+  - path: Sources/StoryFormatDetector/StoryFormatDetector.docc/StoryFormatDetector.md
     type: reference
     stability: stable
     status: active
