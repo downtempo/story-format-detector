@@ -31,6 +31,10 @@ all of them.
 | Web package | .html, .htm | Extension only |
 | Twine source/project | .twee, .tw2, .tw3 | Extension only |
 
+Extension-only formats trust the file name. See the
+[Detection Policy](docs/architecture/detection-policy.md) for the distinction
+between reliable byte signatures and extension fallback.
+
 Blorb files are IFF containers that bundle a story file with cover art and other
 resources. The detector walks the IFF chunk structure to find a `GLUL` execution
 chunk, so it still works when a large resource index pushes the story chunk well
