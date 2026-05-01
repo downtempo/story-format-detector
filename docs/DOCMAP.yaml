@@ -1,0 +1,56 @@
+# docs/DOCMAP.yaml
+#
+# Routing map for StoryFormatDetector documentation.
+
+version: 1
+
+docs:
+  - path: README.md
+    type: index
+    stability: stable
+    status: active
+    covers: []
+
+  - path: CHANGELOG.md
+    type: release-notes
+    stability: stable
+    status: active
+    covers: []
+
+  - path: docs/DOCMAP.yaml
+    type: index
+    stability: stable
+    status: active
+    covers:
+      - "docs/**"
+
+  - path: docs/architecture/detection-policy.md
+    type: architecture
+    stability: stable
+    status: active
+    covers:
+      - "Sources/StoryFormatDetector/**"
+      - "Tests/**"
+
+  - path: docs/process/consumer-adoption.md
+    type: process
+    stability: stable
+    status: active
+    covers:
+      - "README.md"
+      - "Package.swift"
+
+  - path: docs/process/testing.md
+    type: process
+    stability: stable
+    status: active
+    covers:
+      - "Tests/**"
+      - ".github/workflows/**"
+
+  - path: Sources/StoryFormatDetector/StoryFormatDetector.docc/StoryFormatDetector.md
+    type: reference
+    stability: stable
+    status: active
+    covers:
+      - "Sources/StoryFormatDetector/**"
