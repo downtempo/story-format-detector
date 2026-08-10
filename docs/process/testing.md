@@ -7,6 +7,15 @@ swift build
 swift test
 ```
 
+## Hosted CI
+
+Routine build and test coverage runs on Ubuntu. The package currently uses
+Foundation only, so its Apple deployment declarations do not by themselves
+require a premium macOS runner. Superseded pull-request runs are cancelled.
+
+The manual Apple readiness workflow runs native tests and iOS/visionOS
+Simulator builds before release or when Apple-specific code is introduced.
+
 ## Test Ownership
 
 Tests in this package should cover shared detection behavior:
