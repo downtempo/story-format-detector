@@ -19,6 +19,7 @@ in those public files rather than expanding this pointer.
 ## CI Lane Split
 
 Routine package verification runs on Linux while this Foundation-only package
-remains portable. Apple-native and iOS/visionOS simulator builds are a manual
-readiness workflow before release or platform-specific work. Read
-`docs/process/testing.md` before changing this boundary or CI concurrency.
+remains portable. The former manual hosted-Mac job is retired. Apple-native
+readiness is deferred until useful release or platform-specific work has a
+qualified isolated route. Read `docs/process/testing.md` before changing this
+boundary or CI concurrency.
