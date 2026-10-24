@@ -13,8 +13,19 @@ Routine build and test coverage runs on Ubuntu. The package currently uses
 Foundation only, so its Apple deployment declarations do not by themselves
 require a premium macOS runner. Superseded pull-request runs are cancelled.
 
-The manual Apple readiness workflow runs native tests and iOS/visionOS
-Simulator builds before release or when Apple-specific code is introduced.
+The former manual hosted-Mac job is retired. Native Apple readiness is deferred
+until a useful release or platform-specific change can use a qualified isolated
+Mac execution route. No replacement GitHub runner is admitted or qualified by
+this retirement. Public-repository runner admission requires a separate review
+of workflow trust and assignment exposure.
+
+The retained native commands for that future check are:
+
+```bash
+swift test
+xcodebuild -scheme StoryFormatDetector -destination 'generic/platform=iOS Simulator' -skipPackagePluginValidation -skipMacroValidation build
+xcodebuild -scheme StoryFormatDetector -destination 'generic/platform=visionOS Simulator' -skipPackagePluginValidation -skipMacroValidation build
+```
 
 ## Test Ownership
 

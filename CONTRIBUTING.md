@@ -18,9 +18,10 @@ The test suite uses XCTest. All tests must pass before a PR will be merged.
 
 Routine build and test coverage runs on Linux because the package has no
 Apple-only imports or native targets. Superseded pull-request runs are
-cancelled. The manual Apple readiness workflow runs native tests plus iOS and
-visionOS Simulator builds before a release or when platform-specific work is
-introduced.
+cancelled. The former manual hosted-Mac job is retired. Native Apple readiness
+is deferred until a useful release or platform-specific change has a qualified
+isolated execution route. See [testing](docs/process/testing.md) for the retained
+commands and admission boundary.
 
 ## Code style
 
